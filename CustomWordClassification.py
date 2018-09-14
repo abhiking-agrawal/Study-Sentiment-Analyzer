@@ -3,19 +3,24 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.sentiment import vader
+from nltk.stem.snowball import SnowballStemmer
+
+stemmer = SnowballStemmer("english")
 
 sia = vader.SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
 
 #Specify the file paths
-positiveReviewsFileName = "./rt-polaritydata/rt-polarity.pos"
-negativeReviewsFileName = "./rt-polaritydata/rt-polarity.neg"
+positiveReviewsFileName = "./rt-polaritydata/trainingData.txt"
+# positiveReviewsFileName = "./rt-polaritydata/rt-polarity.pos"
+# negativeReviewsFileName = "./rt-polaritydata/rt-polarity.neg"
 
 positiveWords = []
 negativeWords = []
 neutralWords = []
 
 def getSentiment(word):
+    word = stemmer.stem(word)
     polarity = sia.polarity_scores(word)['compound']
     if polarity > 0:
         positiveWords.append(word)
@@ -31,11 +36,11 @@ with open(positiveReviewsFileName,'r') as f:
         for word in word_tokens:
             getSentiment(word)
 
-with open(negativeReviewsFileName,'r') as f:
-    for line in f.readlines():
-        word_tokens =[w for w in word_tokenize(line) if not w in stop_words]
-        for word in word_tokens:
-            getSentiment(word)
+# with open(negativeReviewsFileName,'r') as f:
+#     for line in f.readlines():
+#         word_tokens =[w for w in word_tokenize(line) if not w in stop_words]
+#         for word in word_tokens:
+#             getSentiment(word)
 
 # print(set(positiveWords))
 
