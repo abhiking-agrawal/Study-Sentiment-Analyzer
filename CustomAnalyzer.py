@@ -44,13 +44,13 @@ def computeSentiments(words):
     for word in words:
         word = stemmer.stem(word)
         if word in positiveWords:
-            print(word + "==> pos")
+           # print(word + "==> pos")
             res["pos"] += 1
         elif word in negativeWords:
-            print(word + "==> neg")
+            #print(word + "==> neg")
             res["neg"] += 1
         else:
-            print(word + "==> neu")
+            #print(word + "==> neu")
             res["neu"] += 1
 
     return res
@@ -61,7 +61,7 @@ stop_words = set(stopwords.words('english'))
 #print(max(res, key=res.get))
 
 # print(filtered_sentence)
-exit = True
+exit = False
 while exit:
     sentence = input("Enter a sentence.\n")
     sentence = sentence.lower()
@@ -76,6 +76,24 @@ while exit:
     if flag == "0":
         exit = False
 
+
+from openpyxl import load_workbook
+wb = load_workbook(filename='rt-polaritydata/Manualvalidation_weather.xlsx')
+ws = wb['Sheet2']
+
+op = open("output.csv","w")
+
+for row in ws.rows:
+    for cell in row:
+        sentence = cell.value.lower()
+        word_tokens = word_tokenize(sentence)
+        filtered_sentence = [w for w in word_tokens if not w in stop_words]
+        #print(word_tokens)
+        #print(filtered_sentence)
+        res = computeSentiments(filtered_sentence)
+        result = getSentiment(res)
+        #print(sentence + "==> " + result)
+        op.write(result +"\n")
 
 posF.close()
 negF.close()
