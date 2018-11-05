@@ -76,25 +76,58 @@ while exit:
     if flag == "0":
         exit = False
 
-
+from textblob import TextBlob
+from openpyxl import Workbook
 from openpyxl import load_workbook
-wb = load_workbook(filename='rt-polaritydata/Manualvalidation_weather.xlsx')
-ws = wb['Sheet2']
+#wb = load_workbook(filename='rt-polaritydata/Manualvalidation_weather.xlsx')
+wb = load_workbook(filename='rt-polaritydata/MeTooInput.xlsx')
+ws = wb['Sheet1']
 
+
+writeBook = Workbook()
+dest_filename = 'output_book.xlsx'
+rightSheet = writeBook.create_sheet(title="Sheet")
 op = open("output.csv","w")
 
+rowNo = 1
 for row in ws.rows:
-    for cell in row:
-        sentence = cell.value.lower()
-        word_tokens = word_tokenize(sentence)
-        filtered_sentence = [w for w in word_tokens if not w in stop_words]
-        #print(word_tokens)
-        #print(filtered_sentence)
-        res = computeSentiments(filtered_sentence)
-        result = getSentiment(res)
-        #print(sentence + "==> " + result)
-        op.write(result +"\n")
+    #for cell in row:
+    # print(row[5].value)
+    month = row[3].value
+    year = str(row[4].value)
+    sentence = row[5].value.lower()
+    tb = TextBlob(sentence)
+    if tb.sentiment.polarity > 0:
+        resultTextblob = "Positive"
+    elif tb.sentiment.polarity == 0:
+        resultTextblob = "Neutral"
+    else:
+        resultTextblob = "Negative"
+    word_tokens = word_tokenize(sentence)
+    filtered_sentence = [w for w in word_tokens if not w in stop_words]
+    #print(word_tokens)
+    #print(filtered_sentence)
+    res = computeSentiments(filtered_sentence)
+    result = getSentiment(res)
+    # print(sentence + "==> " + result)
+    # rightSheet.cell(column=1, row=rowNo, value= month)
+    # rightSheet.cell(column=2, row=rowNo, value= year)
+    # rightSheet.cell(column=3, row=rowNo, value= sentence)
+    if rowNo == 1:
+        op.write("Custom Analyzer"+","+"Textblob"+"\n")
+        # rightSheet.cell(column=4, row=rowNo, value= "Custom Analyzer")
+        # rightSheet.cell(column=5, row=rowNo, value= "Textblob")
+    else:
+        op.write(result+","+resultTextblob+"\n")
+        # rightSheet.cell(column=4, row=rowNo, value= result)
+        # rightSheet.cell(column=5, row=rowNo, value= resultTextblob)
+    
+    rowNo = rowNo + 1
+    if rowNo % 10000 == 0:
+        print(rowNo)
 
+print(rowNo)
+# writeBook.save(filename = dest_filename)
 posF.close()
 negF.close()
 # neuF.close()
